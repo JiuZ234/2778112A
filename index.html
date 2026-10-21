@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>27112A · 北京市陈经纶中学分校 VEX 战队答辩评审网站</title>
+<meta name="description" content="北京市陈经纶中学分校 27112A 战队 VEX 赛事答辩专属评审网站：赛事实时计分工具、战队档案、工程日志与战队数字化档案。">
+<meta name="theme-color" content="#040A12">
+<link rel="preconnect" href="https://miaoda.feishu.cn">
+<link href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23071020'/%3E%3Cpath d='M0 0h64v1H0zM0 16h64v1H0zM0 32h64v1H0zM0 48h64v1H0zM0 0h1v64H0zM16 0h1v64h-1zM32 0h1v64h-1zM48 0h1v64h-1z' fill='%232A55A0' opacity='.5'/%3E%3Ctext x='32' y='42' font-family='Consolas,monospace' font-size='24' font-weight='900' fill='%23FF8A3D' text-anchor='middle'%3E27%3C/text%3E%3C/svg%3E">
+<style>
+/* ============ 设计令牌 ============ */
+:root{
+  --bg-0:#040A12;
+  --bg-1:#071120;
+  --bg-2:#0A1A2E;
+  --panel:#081527;
+  --line:rgba(122,166,255,.15);
+  --line-strong:rgba(122,166,255,.38);
+  --text-0:#E8F0FB;
+  --text-1:#A9BFD9;
+  --text-2:#6E86A3;
+  --blue:#4D9BFF;
+  --blue-bright:#7FB5FF;
+  --blue-deep:#1D3A5F;
+  --cyan:#38C6FF;
+  --orange:#FF8A3D;
+  --yellow:#FFD24D;
+  --red:#FF5A5A;
+  --green:#3DDC97;
+  --nav-h:68px;
+  --font-sans:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Consolas','Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg-0);color:var(--text-1);line-height:1.75;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;border-radius:0}
+input,select{font-family:inherit;border-radius:0}
+::selection{background:rgba(77,155,255,.35);color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg-0)}
+::-webkit-scrollbar-thumb{background:var(--blue-deep);border:2px solid var(--bg-0)}
+::-webkit-scrollbar-thumb:hover{background:#2A55A0}
+section[id]{scroll-margin-top:calc(var(--nav-h) + 12px)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* ============ 背景层：深蓝 + 浅蓝网格 + 动态画布 ============ */
+.bg{position:fixed;inset:0;z-index:-2;pointer-events:none;background:
+  radial-gradient(1100px 520px at 72% -8%,rgba(38,99,235,.16),transparent 62%),
+  radial-gradient(760px 420px at 8% 108%,rgba(56,198,255,.07),transparent 60%),
+  linear-gradient(rgba(77,155,255,.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(77,155,255,.05) 1px,transparent 1px);
+  background-size:auto,auto,44px 44px,44px 44px;
+}
+.bg-canvas{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.8}
+
+/* ============ 顶部导航 ============ */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:100;background:rgba(4,10,18,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.progress{position:absolute;top:-1px;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));z-index:2}
+.topbar-in{max-width:1180px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.logo{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo-mark{width:36px;height:36px;border:1px solid var(--line-strong);background:linear-gradient(135deg,var(--bg-2),var(--bg-1));display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:13px;color:var(--orange);position:relative}
+.logo-mark::before{content:'';position:absolute;inset:3px;border:1px solid rgba(77,155,255,.35)}
+.logo-txt{line-height:1.25}
+.logo-txt b{display:block;font-family:var(--font-mono);font-size:17px;font-weight:700;color:var(--text-0);letter-spacing:.06em}
+.logo-txt span{display:block;font-size:10px;color:var(--text-2);letter-spacing:.14em}
+.nav{display:flex;align-items:center;gap:6px}
+.nav a{position:relative;display:block;padding:8px 13px;font-size:14px;color:var(--text-1);letter-spacing:.04em;transition:color .2s}
+.nav a:hover{color:var(--text-0)}
+.nav a.active{color:var(--blue-bright)}
+.nav a.active::after{content:'';position:absolute;left:13px;right:13px;bottom:2px;height:2px;background:var(--blue)}
+.season-chip{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 10px;border:1px solid var(--line-strong);font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--blue-bright);flex-shrink:0}
+.season-chip i{width:6px;height:6px;background:var(--orange);display:inline-block}
+.nav-toggle{display:none;width:44px;height:44px;background:transparent;border:1px solid var(--line-strong);cursor:pointer;position:relative;flex-shrink:0}
+.nav-toggle span,.nav-toggle::before,.nav-toggle::after{content:'';position:absolute;left:11px;right:11px;height:2px;background:var(--text-0);transition:transform .25s,opacity .25s}
+.nav-toggle span{top:20px}
+.nav-toggle::before{top:13px}
+.nav-toggle::after{bottom:13px}
+.nav-toggle.open span{opacity:0}
+.nav-toggle.open::before{transform:translateY(7px) rotate(45deg)}
+.nav-toggle.open::after{transform:translateY(-7px) rotate(-45deg)}
+.nav-panel{display:none;position:fixed;top:var(--nav-h);left:0;right:0;z-index:99;background:rgba(4,10,18,.97);border-bottom:1px solid var(--line)}
+.nav-panel a{display:block;padding:15px 28px;font-size:15px;color:var(--text-1);border-bottom:1px solid var(--line)}
+.nav-panel a.active{color:var(--blue-bright);background:rgba(77,155,255,.06)}
+
+/* ============ 通用组件 ============ */
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+section{padding:92px 0;border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:flex-end;gap:18px;margin-bottom:52px;flex-wrap:wrap}
+.sec-index{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--blue);border:1px solid var(--line-strong);padding:5px 11px;line-height:1;letter-spacing:.1em}
+.sec-zh{font-size:32px;font-weight:900;color:var(--text-0);letter-spacing:.06em;line-height:1.2}
+.sec-en{font-family:var(--font-mono);font-size:11px;letter-spacing:.3em;color:var(--text-2);margin-top:6px}
+.sec-rule{flex:1;min-width:60px;height:1px;background:linear-gradient(90deg,var(--line-strong),transparent);align-self:center;margin-bottom:8px}
+.sec-desc{max-width:420px;font-size:14px;color:var(--text-2);line-height:1.8;margin-bottom:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:48px;padding:0 26px;font-size:15px;font-weight:700;letter-spacing:.06em;color:var(--text-0);background:transparent;border:1px solid var(--line-strong);cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .15s;user-select:none}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--blue-bright);border-color:var(--blue-bright);color:#04203C}
+.btn-primary:hover{background:#93C4FF;border-color:#93C4FF}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue-bright);background:rgba(77,155,255,.08)}
+.btn-lg{height:54px;padding:0 32px;font-size:16px}
+.link-arrow{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--text-1);border-bottom:1px solid var(--line-strong);padding-bottom:2px;transition:color .2s,border-color .2s}
+.link-arrow:hover{color:var(--blue-bright);border-color:var(--blue)}
+.frame{position:relative;border:1px solid var(--line-strong);background:var(--bg-1)}
+.frame::before,.frame::after{content:'';position:absolute;width:16px;height:16px;border:2px solid var(--blue);z-index:3;pointer-events:none}
+.frame::before{top:-2px;left:-2px;border-right:none;border-bottom:none}
+.frame::after{bottom:-2px;right:-2px;border-left:none;border-top:none}
+.chip{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border:1px solid var(--line-strong);font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--text-1)}
+.chip b{color:var(--blue-bright);font-weight:700}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--line-strong);font-size:13px;letter-spacing:.1em;color:var(--text-1);position:relative;background:rgba(8,21,39,.6)}
+.eyebrow::before{content:'';width:8px;height:8px;background:var(--orange);flex-shrink:0}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:1px solid var(--line-strong);font-family:var(--font-mono);font-size:11px;letter-spacing:.08em}
+.badge::before{content:'';width:6px;height:6px}
+.badge-ok{color:var(--green);border-color:rgba(61,220,151,.4)}
+.badge-ok::before{background:var(--green)}
+.badge-warn{color:var(--yellow);border-color:rgba(255,210,77,.4)}
+.badge-warn::before{background:var(--yellow)}
+.badge-dq{color:var(--red);border-color:rgba(255,90,90,.4)}
+.badge-dq::before{background:var(--red)}
+.badge-blue{color:var(--blue-bright);border-color:rgba(127,181,255,.4)}
+.badge-blue::before{background:var(--blue)}
+.tag{display:inline-block;padding:3px 9px;border:1px solid var(--line-strong);font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--blue-bright)}
+
+/* ============ 首页 Hero ============ */
+#home{border-top:none;padding:calc(var(--nav-h) + 72px) 0 88px;min-height:100vh;display:flex;align-items:center}
+.hero{display:grid;grid-template-columns:1.04fr .96fr;gap:60px;align-items:center}
+.hero-copy .eyebrow{margin-bottom:28px}
+.hero h1{font-family:var(--font-mono);font-size:clamp(64px,9vw,118px);font-weight:700;line-height:.98;color:var(--text-0);letter-spacing:.01em}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{margin-top:14px;font-family:var(--font-mono);font-size:clamp(12px,1.4vw,15px);letter-spacing:.22em;color:var(--blue-bright)}
+.hero-slogan{display:flex;align-items:center;gap:14px;margin:34px 0 10px;font-size:19px;font-weight:700;color:var(--text-0);letter-spacing:.1em}
+.hero-slogan::before{content:'';width:3px;height:24px;background:var(--orange)}
+.hero-quote{font-size:14px;color:var(--text-2);margin-bottom:34px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.hero-visual{position:relative}
+.hero-visual .frame{overflow:hidden}
+.hero-visual img{width:100%;aspect-ratio:16/9;object-fit:cover;filter:contrast(1.06) saturate(1.06)}
+.hero-scan{position:absolute;left:0;right:0;top:0;height:26%;background:linear-gradient(180deg,transparent,rgba(127,181,255,.14),transparent);animation:scan 7s linear infinite;z-index:2;pointer-events:none}
+@keyframes scan{0%{transform:translateY(-30%)}100%{transform:translateY(410%)}}
+.hero-cap{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 14px;border:1px solid var(--line);border-top:none;background:rgba(8,21,39,.7);font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;color:var(--text-2)}
+.hero-cap b{color:var(--blue-bright);font-weight:500}
+.float-chip{position:absolute;z-index:4;padding:9px 13px;border:1px solid var(--line-strong);background:rgba(4,10,18,.86);font-family:var(--font-mono);line-height:1.3;letter-spacing:.08em}
+.float-chip b{display:block;font-size:20px;font-weight:700;color:var(--yellow)}
+.float-chip span{font-size:10px;color:var(--text-2)}
+.float-tl{top:16px;right:16px}
+.float-bl{bottom:46px;left:16px}
+.float-bl b{color:var(--blue-bright)}
+
+/* ============ 核心数据区 ============ */
+#stats{padding:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(8,21,39,.55)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:34px 26px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:none}
+.stat-num{font-family:var(--font-mono);font-size:clamp(34px,4.4vw,52px);font-weight:700;color:var(--text-0);line-height:1.1;letter-spacing:.01em}
+.stat-num small{font-size:.52em;color:var(--blue-bright);font-weight:500;margin-left:3px}
+.stat-label{margin-top:10px;font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--text-1)}
+.stat-sub{margin-top:4px;font-size:12px;color:var(--text-2)}
+.stat-bar{height:2px;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));margin-top:14px;transition:width 1.2s ease}
+
+/* ============ 战队档案 ============ */
+.team-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:48px;align-items:start}
+.team-photo .frame{overflow:hidden}
+.team-photo img{width:100%;aspect-ratio:3/2.06;object-fit:cover}
+.team-cap{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border:1px solid var(--line);border-top:none;background:rgba(8,21,39,.7);font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;color:var(--text-2)}
+.team-cap b{color:var(--blue-bright);font-weight:500}
+.team-intro h3{font-size:22px;font-weight:900;color:var(--text-0);letter-spacing:.05em;margin-bottom:16px}
+.team-intro p{font-size:14.5px;color:var(--text-1);line-height:2;margin-bottom:26px}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.role{border:1px solid var(--line);padding:18px 20px;background:rgba(8,21,39,.5);transition:border-color .2s,background .2s;position:relative}
+.role:hover{border-color:var(--line-strong);background:rgba(13,32,58,.6)}
+.role .role-idx{font-family:var(--font-mono);font-size:11px;color:var(--blue);letter-spacing:.1em;display:block;margin-bottom:10px}
+.role h4{font-size:16px;font-weight:900;color:var(--text-0);letter-spacing:.04em;display:flex;align-items:center;gap:10px}
+.role h4::after{content:'';flex:1;height:1px;background:var(--line)}
+.role p{font-size:13px;color:var(--text-2);line-height:1.8;margin-top:8px}
+.role .tag{margin-top:12px}
+/* 时间轴 */
+.tl{margin-top:56px}
+.tl-title{display:flex;align-items:center;gap:14px;margin-bottom:38px}
+.tl-title h3{font-size:20px;font-weight:900;color:var(--text-0);letter-spacing:.05em}
+.tl-title span{font-family:var(--font-mono);font-size:11px;letter-spacing:.24em;color:var(--text-2)}
+.tl-line{position:relative;padding-left:46px}
+.tl-line::before{content:'';position:absolute;left:21px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--blue),rgba(77,155,255,.08))}
+.tl-item{position:relative;padding-bottom:44px}
+.tl-item:last-child{padding-bottom:8px}
+.tl-item::before{content:'';position:absolute;left:15px;top:4px;width:14px;height:14px;background:var(--bg-2);border:2px solid var(--blue);z-index:1}
+.tl-item.warn::before{border-color:var(--orange)}
+.tl-item.gold::before{border-color:var(--yellow)}
+.tl-stage{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;color:var(--blue);margin-bottom:6px}
+.tl-item.warn .tl-stage{color:var(--orange)}
+.tl-item.gold .tl-stage{color:var(--yellow)}
+.tl-item h4{font-size:18px;font-weight:900;color:var(--text-0);letter-spacing:.04em;margin-bottom:8px}
+.tl-item p{font-size:14px;color:var(--text-1);line-height:1.9;max-width:640px}
+.tl-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.tl-thumb{width:100%;max-width:280px;margin-top:16px;border:1px solid var(--line);background:var(--bg-1)}
+.tl-thumb img{width:100%;aspect-ratio:4/3;object-fit:cover}
+
+/* ============ 赛事实用工具 ============ */
+.rule-strip{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px 20px;border:1px solid var(--line-strong);background:rgba(8,21,39,.6);margin-bottom:26px}
+.rule-strip .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;color:var(--blue);margin-right:6px}
+.rule-pill{font-family:var(--font-mono);font-size:13px;color:var(--text-0);border:1px solid var(--line);padding:6px 12px;letter-spacing:.04em}
+.rule-pill b{color:var(--yellow);font-weight:700;margin-left:8px}
+.rule-note{margin-left:auto;font-size:12px;color:var(--text-2)}
+.panel{border:1px solid var(--line);background:rgba(7,17,32,.72);margin-bottom:26px}
+.panel-head{display:flex;align-items:center;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel-no{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--blue);border:1px solid var(--line-strong);padding:4px 9px;line-height:1}
+.panel-head h3{font-size:18px;font-weight:900;color:var(--text-0);letter-spacing:.04em}
+.panel-head .desc{font-size:12.5px;color:var(--text-2);margin-left:auto}
+.panel-body{padding:26px 24px}
+.calc-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.calc-table th,.calc-table td{border:1px solid var(--line);padding:12px 8px;text-align:center}
+.calc-table thead th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.16em;color:var(--text-1);font-weight:500;background:rgba(13,32,58,.5)}
+.calc-table thead th .pt{display:block;font-size:10px;color:var(--text-2);letter-spacing:.08em;margin-top:3px}
+.calc-table tbody th{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--text-0);background:rgba(13,32,58,.3)}
+.calc-table tbody th b{color:var(--yellow);margin-left:6px}
+.calc-table td.cell-red{background:rgba(255,90,90,.04)}
+.calc-table td.cell-blue{background:rgba(77,155,255,.05)}
+.calc-table td.cell-yellow{background:rgba(255,210,77,.05)}
+.calc-table td.na{background:rgba(13,32,58,.3);color:var(--text-2);font-family:var(--font-mono);font-size:16px;font-weight:700}
+.calc-table td.na span{display:block;font-size:10px;font-weight:500;letter-spacing:.1em;color:var(--text-2);margin-top:2px}
+.calc-table tbody th .th-note{display:block;font-family:var(--font-sans);font-size:10px;font-weight:500;letter-spacing:.14em;color:var(--text-2);margin-top:2px}
+.num-input{width:76px;height:42px;background:var(--bg-0);border:1px solid var(--line-strong);color:var(--text-0);font-family:var(--font-mono);font-size:16px;text-align:center;transition:border-color .2s,box-shadow .2s}
+.num-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(77,155,255,.2)}
+.num-input:hover{border-color:var(--blue)}
+.tool-result{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.tr-card{border:1px solid var(--line);padding:18px 20px;background:rgba(4,10,18,.5)}
+.tr-card .k{font-size:11px;letter-spacing:.16em;color:var(--text-2);font-family:var(--font-mono)}
+.tr-card .v{font-family:var(--font-mono);font-size:30px;font-weight:700;color:var(--text-0);margin-top:6px;line-height:1.1}
+.tr-card .v small{font-size:.55em;color:var(--blue-bright);font-weight:500;margin-left:4px}
+.tr-card.dim .v{color:var(--text-1)}
+.tr-card.key{background:rgba(13,32,58,.6);border-color:var(--line-strong)}
+.tr-card.key .v{color:var(--blue-bright)}
+.tr-card.dq .v{color:var(--red)}
+.dual-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.dual-grid .panel{margin-bottom:0}
+.field{margin-bottom:22px}
+.field label{display:block;font-size:12.5px;letter-spacing:.1em;color:var(--text-2);margin-bottom:9px;font-family:var(--font-mono)}
+.field .f-row{display:flex;align-items:center;gap:14px}
+.field .unit{font-family:var(--font-mono);font-size:13px;color:var(--text-2)}
+.range-input{flex:1;height:36px;background:transparent;-webkit-appearance:none;appearance:none}
+.range-input::-webkit-slider-runnable-track{height:2px;background:var(--line-strong)}
+.range-input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--blue-bright);border:2px solid var(--bg-0);margin-top:-7px;cursor:pointer}
+.range-input::-moz-range-track{height:2px;background:var(--line-strong)}
+.range-input::-moz-range-thumb{width:13px;height:13px;background:var(--blue-bright);border:none;border-radius:0;cursor:pointer}
+.range-val{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--text-0);min-width:58px;text-align:right}
+.range-val small{font-size:.6em;color:var(--blue-bright);margin-left:2px}
+.verdict{border:1px solid var(--line-strong);padding:20px 22px;display:flex;align-items:flex-start;gap:16px;background:rgba(4,10,18,.5)}
+.verdict .vd-ico{width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;border:1px solid}
+.verdict h4{font-size:16px;font-weight:900;color:var(--text-0);letter-spacing:.04em}
+.verdict p{font-size:13px;color:var(--text-1);line-height:1.85;margin-top:5px}
+.verdict.ok{border-color:rgba(61,220,151,.45)}
+.verdict.ok .vd-ico{color:var(--green);border-color:rgba(61,220,151,.5)}
+.verdict.warn{border-color:rgba(255,210,77,.45)}
+.verdict.warn .vd-ico{color:var(--yellow);border-color:rgba(255,210,77,.5)}
+.verdict.info{border-color:rgba(77,155,255,.45)}
+.verdict.info .vd-ico{color:var(--blue-bright);border-color:rgba(77,155,255,.5)}
+.verdict.dq{border-color:rgba(255,90,90,.5);background:rgba(40,10,18,.4)}
+.verdict.dq .vd-ico{color:var(--red);border-color:rgba(255,90,90,.55)}
+
+/* 比赛排表 */
+.rank-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.rank-toolbar input,.rank-toolbar select{background:rgba(4,10,18,.7);border:1px solid var(--line-strong);color:var(--text-0);padding:10px 12px;font-family:var(--font-mono);font-size:13px;outline:none}
+.rank-toolbar input:focus,.rank-toolbar select:focus{border-color:var(--blue-bright)}
+.btn-primary{background:var(--blue-bright);color:#040A12;border:none;padding:10px 18px;font-family:var(--font-mono);font-size:13px;font-weight:700;letter-spacing:.08em;cursor:pointer}
+.btn-primary:hover{background:#9DC3FF}
+.rank-table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:460px}
+.rank-table .w-rank{width:48px}
+.rank-table .w-alliance{width:70px}
+.rank-table .w-score{width:72px}
+.rank-table .w-total{width:80px}
+.rank-table .w-del{width:56px}
+.rank-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;min-width:0}
+.rank-table th,.rank-table td{border:1px solid var(--line);padding:10px 8px;text-align:center;font-family:var(--font-mono);font-size:13px}
+.rank-table thead th{font-size:11px;letter-spacing:.14em;color:var(--text-1);background:rgba(13,32,58,.5);font-weight:500}
+.rank-table tbody td input{width:100%;background:transparent;border:none;color:var(--text-0);text-align:center;font-family:var(--font-mono);font-size:14px;outline:none;padding:4px 0}
+.rank-table tbody td input:focus{border-bottom:1px solid var(--blue-bright)}
+.rank-table .rank-no{font-weight:700;color:var(--yellow)}
+.rank-table .rank-name{font-weight:700;color:var(--text-0);text-align:left;padding-left:14px}
+.rank-table .rank-alli{font-size:12px}
+.rank-table .rank-total{font-weight:700;color:var(--yellow);font-size:15px}
+.rank-table .rank-del{color:var(--red);cursor:pointer;font-size:16px;border:none;background:none;padding:4px 8px}
+.rank-table .rank-del:hover{color:#FFB3B3}
+.check-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+.check-row input[type=checkbox]{width:20px;height:20px;accent-color:var(--blue);cursor:pointer}
+.check-row label{font-size:15px;font-weight:700;color:var(--text-0);cursor:pointer;letter-spacing:.04em}
+.check-row .hint{font-size:12px;color:var(--text-2)}
+.foul-box{display:none;margin-top:20px;padding:18px 20px;border:1px dashed rgba(255,90,90,.45);background:rgba(40,10,18,.35)}
+.foul-box.show{display:block}
+.foul-box h4{font-size:14px;font-weight:900;color:var(--red);letter-spacing:.05em;margin-bottom:10px}
+.foul-opts{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.foul-opt{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:1px solid var(--line-strong);cursor:pointer;font-size:13px;color:var(--text-1);transition:border-color .2s,color .2s,background .2s}
+.foul-opt:hover{border-color:var(--red);color:var(--text-0)}
+.foul-opt.on{border-color:var(--red);color:var(--red);background:rgba(255,90,90,.1)}
+.foul-opt input{display:none}
+
+/* ============ 程序工程笔记 ============ */
+.plog{display:flex;flex-direction:column;gap:14px}
+.plog-item{border:1px solid var(--line);border-left:3px solid var(--blue);background:rgba(7,17,32,.62);padding:22px 24px}
+.plog-item .plog-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.plog-item .plog-no{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--cyan);letter-spacing:.12em}
+.plog-item h3{font-size:17px;font-weight:900;color:var(--text-0);letter-spacing:.02em;margin-bottom:14px}
+.plog-row{display:grid;grid-template-columns:56px 1fr;gap:14px;padding:9px 0;border-top:1px solid rgba(122,166,255,.08)}
+.plog-row:first-of-type{border-top:none}
+.plog-row .plog-k{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--blue-bright);letter-spacing:.16em;padding-top:3px}
+.plog-row p{font-size:14px;color:var(--text-1);line-height:1.95}
+.plog-row p b{color:var(--text-0)}
+.code-wrap{margin-top:28px;border:1px solid var(--line-strong);background:rgba(4,10,18,.7)}
+.code-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.code-head h3{font-size:15px;font-weight:900;color:var(--text-0);letter-spacing:.04em}
+.code-head .lang{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;color:var(--blue-bright);border:1px solid var(--line-strong);padding:4px 10px}
+.code-box{display:grid;grid-template-columns:56px 1fr}
+.code-shot{background:rgba(4,10,18,.6)}
+.code-shot img{width:100%;display:block}
+.code-ln{padding:18px 0;text-align:right;font-family:var(--font-mono);font-size:12.5px;color:var(--text-2);border-right:1px solid var(--line);user-select:none;line-height:1.9}
+.code-ln span{display:block;padding-right:14px}
+pre.code{flex:1;padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.9;color:#C9DCEE;background:transparent;white-space:pre}
+pre.code .c{color:#5A7392;font-style:italic}
+pre.code .k{color:#7FB5FF}
+pre.code .t{color:#38C6FF}
+pre.code .n{color:#FFD24D}
+pre.code .s{color:#3DDC97}
+pre.code .f{color:#FFB27A}
+.code-explain{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line)}
+.code-explain .ce{padding:18px 22px}
+.code-explain .ce+.ce{border-left:1px solid var(--line)}
+.code-explain h4{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;color:var(--blue);margin-bottom:8px}
+.code-explain p{font-size:13px;color:var(--text-1);line-height:1.85}
+
+/* ============ 响应式 ============ */
+@media (max-width:1024px){
+  .hero{grid-template-columns:1fr;gap:44px}
+  .hero-visual{max-width:640px}
+  .team-grid{grid-template-columns:1fr;gap:36px}
+  .tool-result{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:860px){
+  .nav{display:none}
+  .nav-toggle{display:block}
+  .nav-panel{display:block;transform:translateY(-8px);opacity:0;visibility:hidden;transition:transform .25s,opacity .25s,visibility .25s}
+  .nav-panel.open{transform:translateY(0);opacity:1;visibility:visible}
+  .season-chip{display:none}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:nth-child(3){border-left:none}
+  .stat{border-top:1px solid var(--line)}
+  .stat:nth-child(-n+2){border-top:none}
+  .dual-grid{grid-template-columns:1fr;gap:26px}
+  .roles{grid-template-columns:1fr}
+  .code-explain{grid-template-columns:1fr}
+  .code-explain .ce+.ce{border-left:none;border-top:1px solid var(--line)}
+  footer .container > div:first-child{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  section{padding:68px 0}
+  .hero h1{font-size:64px}
+  .hero-cta .btn{width:100%}
+  .calc-table th,.calc-table td{padding:10px 4px}
+  .num-input{width:60px;height:40px;font-size:16px}
+  .rule-note{margin-left:0;width:100%}
+  .tool-result{grid-template-columns:1fr 1fr}
+  .sec-zh{font-size:26px}
+  .panel-body{padding:18px 14px}
+  .panel-head{padding:14px 14px}
+  .rank-toolbar input,.rank-toolbar select{padding:8px 10px;font-size:12px}
+  .rank-table{min-width:0}
+  .rank-table th,.rank-table td{padding:8px 4px;font-size:12px}
+  .rank-table .w-rank{width:36px}
+  .rank-table .w-alliance{width:50px}
+  .rank-table .w-score{width:52px}
+  .rank-table .w-total{width:60px}
+  .rank-table .w-del{width:40px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+<canvas id="bgCanvas" class="bg-canvas" width="1600" height="900" aria-hidden="true"></canvas>
+
+<header class="topbar">
+  <div class="progress" id="progressBar"></div>
+  <div class="topbar-in">
+    <a class="logo" href="#home" aria-label="返回首页">
+      <span class="logo-mark">27</span>
+      <span class="logo-txt"><b>27112A</b><span>北京市陈经纶中学分校</span></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="#home" class="active">首页</a>
+      <a href="#team">战队档案</a>
+      <a href="#tool">赛事实用工具</a>
+      <a href="#log">工程日志</a>
+    </nav>
+    <span class="season-chip"><i></i>VEX LEVEL UP · 2025-2026</span>
+    <button class="nav-toggle" id="navToggle" aria-label="展开菜单" aria-expanded="false"><span></span></button>
+  </div>
+</header>
+<div class="nav-panel" id="navPanel">
+  <a href="#home">首页</a>
+  <a href="#team">战队档案</a>
+  <a href="#tool">赛事实用工具</a>
+  <a href="#log">工程日志</a>
+</div>
+
+<main>
+  <!-- ===== 视图：首页 ===== -->
+  <section id="home">
+    <div class="container">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">北京市陈经纶中学分校 · VEX 机器人战队</span>
+          <h1>2711<em>2A</em></h1>
+          <div class="hero-sub">CHENJINGLUN MIDDLE SCHOOL · VEX ROBOTICS TEAM</div>
+          <div class="hero-slogan">勤奋创新，稳中求进。</div>
+          <p class="hero-quote">基于 VEX Level Up 赛季规则自主开发的交互式评审网站：战术计分推演、工程迭代档案与答辩问答，一站呈现。</p>
+          <div class="hero-chips">
+            <span class="chip">队伍编号 <b>27112A</b></span>
+            <span class="chip">赛季 <b>LEVEL UP</b></span>
+            <span class="chip">所在地 <b>北京</b></span>
+          </div>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg" href="#tool">打开赛事实用工具</a>
+            <a class="btn btn-ghost btn-lg" href="#log">浏览工程日志</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="frame">
+            <div class="hero-scan" aria-hidden="true"></div>
+            <img src="assets/hero-robot2.jpg" alt="27112A 二代竞赛机器人实拍">
+          </div>
+          <div class="hero-cap">结构修改</div>
+          <div class="float-chip float-tl"><b>312</b><span>队史最高分</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 核心数据 ===== -->
+  <section id="stats">
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num"><span class="count" data-target="312" data-decimals="0">0</span><small>分</small></div>
+          <div class="stat-label">最高单场总分</div>
+          <div class="stat-sub">当赛季最高成绩</div>
+          <div class="stat-bar" data-w="100%"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span class="count" data-target="244.7" data-decimals="1">0</span><small>分</small></div>
+          <div class="stat-label">平均总分</div>
+          <div class="stat-sub">当赛季全部场次均值</div>
+          <div class="stat-bar" data-w="78%"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span class="count" data-target="3" data-decimals="0">0</span><small>代</small></div>
+          <div class="stat-label">迭代车辆</div>
+          <div class="stat-sub">初代 → 二代 → 三代</div>
+          <div class="stat-bar" data-w="46%"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span class="count" data-target="300" data-decimals="0">0</span><small>分</small></div>
+          <div class="stat-label">联盟冲击线</div>
+          <div class="stat-sub">合作赛战术测算目标</div>
+          <div class="stat-bar" data-w="88%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：战队档案 ===== -->
+  <section id="team">
+    <div class="container">
+      <div class="sec-head">
+        <div class="sec-index">01</div>
+        <div>
+          <h2 class="sec-zh">战队档案</h2>
+          <div class="sec-en">TEAM &amp; HISTORY</div>
+        </div>
+        <div class="sec-rule"></div>
+        <p class="sec-desc">团队分工协作，工程迭代有据可查。从一代车搭建、城市赛复盘到赛季最高分，每一程都有完整记录。</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-photo">
+          <div class="frame">
+            <img src="assets/team-photo.jpg" alt="27112A 战队合影">
+          </div>
+          <div class="team-cap">FIG-02 · 战队合影 <b>TEAM 27112A</b></div>
+        </div>
+        <div class="team-intro">
+          <h3>一支把工程本搬进浏览器的队伍</h3>
+          <p>27112A 战队来自北京市陈经纶中学分校。我们在机械、程序、操控与文案四线并行作战：每一代机器人都有完整的图纸与调试记录，每一次赛事都有可复盘的得分数据。本站以交互式数字档案替代传统纸质汇报，让评委在几分钟内读懂我们的工程迭代与技术思考。</p>
+          <div class="roles">
+            <div class="role">
+              <span class="role-idx">R-01</span>
+              <h4>机械搭建</h4>
+              <p>负责车架、吸包机构与抬升机构的选型与装配，主导二代刚性车架重构。</p>
+              <span class="tag">铝型材 · 齿轮传动</span>
+            </div>
+            <div class="role">
+              <span class="role-idx">R-02</span>
+              <h4>程序开发</h4>
+              <p>负责自动程序、分段速度到位矫正与多线程调度，计分推演工具的原生代码开发。</p>
+              <span class="tag">C++ · JavaScript</span>
+            </div>
+            <div class="role">
+              <span class="role-idx">R-03</span>
+              <h4>操作手</h4>
+              <p>负责场上操控与战术执行，输出每一场的战术复盘与联盟配合方案。</p>
+              <span class="tag">战术推演 · 复盘</span>
+            </div>
+            <div class="role">
+              <span class="role-idx">R-04</span>
+              <h4>宣传文案</h4>
+              <p>负责工程日志整理与赛事宣传物料，沉淀战队数字档案。</p>
+              <span class="tag">工程记录 · 答辩</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tl">
+        <div class="tl-title">
+          <h3>备赛历程</h3>
+          <span>TIMELINE · 2025-2026 SEASON</span>
+        </div>
+        <div class="tl-line">
+          <div class="tl-item">
+            <div class="tl-stage">STAGE 01</div>
+            <h4>初代探索</h4>
+            <p>一代车完成搭建，初次尝试吸包结构与折叠式 L4 机构。在结构与程序的探索中建立了第一套调试流程，也发现了多处结构隐患。</p>
+            <div class="tl-meta">
+              <span class="badge badge-blue">一代车</span>
+              <span class="badge">吸包结构原型</span>
+              <span class="badge">折叠 L4</span>
+            </div>
+            <div class="tl-thumb frame"><img src="assets/robot-gen1.jpg" alt="一代车工作台实拍"></div>
+          </div>
+          <div class="tl-item warn">
+            <div class="tl-stage">STAGE 02</div>
+            <h4>城市赛挫折</h4>
+            <p>北京城市赛获得 220 分、排名第 30。比赛暴露吸包定位不准、行驶跑偏两类系统性问题——这些问题靠修修补补无法根治。</p>
+            <div class="tl-meta">
+              <span class="badge badge-warn">220 分</span>
+              <span class="badge badge-warn">排名 30</span>
+              <span class="badge">定位偏差</span>
+              <span class="badge">行驶跑偏</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：赛事实用工具 ===== -->
+  <section id="tool">
+    <div class="container">
+      <div class="sec-head">
+        <div class="sec-index">02</div>
+        <div>
+          <h2 class="sec-zh">赛事实用工具</h2>
+          <div class="sec-en">SCORING TOOL</div>
+        </div>
+        <div class="sec-rule"></div>
+        <p class="sec-desc">基于 VEX Level Up 规则原生的战术推演器：实时估分、联盟配对测算与规则校验。</p>
+      </div>
+      <div class="rule-strip">
+        <span class="lbl">计分规则速查</span>
+        <span class="rule-pill">L1<b>3 分</b></span>
+        <span class="rule-pill">L2<b>6 分</b></span>
+        <span class="rule-pill">L3<b>12 分</b></span>
+        <span class="rule-pill">L4<b>16 分</b></span>
+        <span class="rule-note">依据 VEX Level Up 官方手册 · L4 仅中立黄包计 16 分，红 / 蓝方包放置 L4 不计分</span>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-no">01</span>
+          <h3>实时战况估算</h3>
+          <span class="desc">输入各层级红 / 蓝 / 黄包数量，实时计算当前得分</span>
+        </div>
+        <div class="panel-body">
+          <table class="calc-table">
+            <colgroup>
+              <col style="width:16%">
+              <col style="width:28%">
+              <col style="width:28%">
+              <col style="width:28%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>层级</th>
+                <th class="cell-red">红方包<span class="pt">RED · 我方</span></th>
+                <th class="cell-blue">蓝方包<span class="pt">BLUE · 对方</span></th>
+                <th class="cell-yellow">中立黄包<span class="pt">YELLOW · 共享</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>L4<b>16 分</b><span class="th-note">仅黄包</span></th>
+                <td class="cell-red na">— <span>不计分</span></td>
+                <td class="cell-blue na">— <span>不计分</span></td>
+                <td class="cell-yellow"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="4" data-color="yellow" aria-label="L4 中立黄包数量"></td>
+              </tr>
+              <tr>
+                <th>L3<b>12 分</b></th>
+                <td class="cell-red"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="3" data-color="red" aria-label="L3 红方包数量"></td>
+                <td class="cell-blue"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="3" data-color="blue" aria-label="L3 蓝方包数量"></td>
+                <td class="cell-yellow"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="3" data-color="yellow" aria-label="L3 中立黄包数量"></td>
+              </tr>
+              <tr>
+                <th>L2<b>6 分</b></th>
+                <td class="cell-red"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="2" data-color="red" aria-label="L2 红方包数量"></td>
+                <td class="cell-blue"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="2" data-color="blue" aria-label="L2 蓝方包数量"></td>
+                <td class="cell-yellow"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="2" data-color="yellow" aria-label="L2 中立黄包数量"></td>
+              </tr>
+              <tr>
+                <th>L1<b>3 分</b></th>
+                <td class="cell-red"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="1" data-color="red" aria-label="L1 红方包数量"></td>
+                <td class="cell-blue"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="1" data-color="blue" aria-label="L1 蓝方包数量"></td>
+                <td class="cell-yellow"><input class="num-input bag-input" type="number" min="0" max="20" value="0" data-level="1" data-color="yellow" aria-label="L1 中立黄包数量"></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="tool-result">
+            <div class="tr-card key" id="resRedCard">
+              <div class="k">红方得分 · 我方</div>
+              <div class="v" id="resRed">0<small>分</small></div>
+            </div>
+            <div class="tr-card key" id="resBlueCard">
+              <div class="k">蓝方得分 · 对方</div>
+              <div class="v" id="resBlue">0<small>分</small></div>
+            </div>
+            <div class="tr-card dim">
+              <div class="k">黄包中立得分</div>
+              <div class="v" id="resYellow">0<small>分</small></div>
+            </div>
+            <div class="tr-card key" id="resTotalCard">
+              <div class="k">全场落包总得分</div>
+              <div class="v" id="resTotal">0<small>分</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dual-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-no">02</span>
+            <h3>合作赛配对测算</h3>
+            <span class="desc">联盟总分是否够格冲击 300 分</span>
+          </div>
+          <div class="panel-body">
+            <div class="field">
+              <label for="myScore">我方预估得分</label>
+              <div class="f-row">
+                <input class="range-input" type="range" id="myScore" min="0" max="400" value="160" step="1">
+                <span class="range-val" id="myScoreVal">160<small>分</small></span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="allyScore">联盟队友预估得分</label>
+              <div class="f-row">
+                <input class="range-input" type="range" id="allyScore" min="0" max="400" value="120" step="1">
+                <span class="range-val" id="allyScoreVal">120<small>分</small></span>
+              </div>
+            </div>
+            <div class="tool-result" style="grid-template-columns:1fr 1fr;margin-top:8px">
+              <div class="tr-card key">
+                <div class="k">联盟总分</div>
+                <div class="v" id="allyTotal">280<small>分</small></div>
+              </div>
+              <div class="tr-card">
+                <div class="k">距 300 分线</div>
+                <div class="v" id="allyGap">-20<small>分</small></div>
+              </div>
+            </div>
+            <div style="margin-top:18px">
+              <div style="height:4px;background:var(--line);position:relative">
+                <div style="position:absolute;left:75%;top:-3px;bottom:-3px;width:2px;background:var(--yellow)" aria-hidden="true"></div>
+                <div id="allyBar" style="height:100%;width:70%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .3s ease"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--text-2);margin-top:6px">
+                <span>0</span><span>300 分线</span><span>400</span>
+              </div>
+            </div>
+            <div class="verdict" id="allyVerdict" style="margin-top:20px">
+              <div class="vd-ico">OK</div>
+              <div>
+                <h4>联盟总分已达 300 分冲击线</h4>
+                <p>当前配对具备冲击 300 分实力的条件，可在联盟沟通中确认分工与节奏。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-no">03</span>
+            <h3>规则校验 &amp; 犯规警告</h3>
+            <span class="desc">双持判罚与扣分影响</span>
+          </div>
+          <div class="panel-body">
+            <div class="check-row">
+              <input type="checkbox" id="doubleHold">
+              <label for="doubleHold">是否双持（同一时刻携带 ≥ 2 个得分包）</label>
+              <span class="hint" style="margin-left:auto">依据规则：机器人每次仅允许携带 1 个得分包</span>
+            </div>
+            <div class="foul-box" id="foulBox">
+              <h4>犯规判罚确认</h4>
+              <p style="font-size:13px;color:var(--text-1);line-height:1.85">勾选双持后需确认累计犯规次数，将联动下方判定与左侧全场得分：</p>
+              <div class="foul-opts" role="radiogroup" aria-label="犯规次数">
+                <label class="foul-opt on"><input type="radio" name="foulTimes" value="1" checked>累计 1 次 · 警告</label>
+                <label class="foul-opt"><input type="radio" name="foulTimes" value="2">累计 2 次及以上 · 取消资格</label>
+              </div>
+            </div>
+            <div class="verdict ok" id="foulVerdict" style="margin-top:20px">
+              <div class="vd-ico">OK</div>
+              <div>
+                <h4>当前判定：合规</h4>
+                <p>未触发双持犯规，本场得分正常有效。程序侧通过吸包状态锁 + 多线程互斥保证逻辑上杜绝双持。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-no">04</span>
+            <h3>比赛排表 · 自动排名</h3>
+            <span class="desc">录入队伍与各场得分，自动汇总总分与排名</span>
+          </div>
+          <div class="panel-body">
+            <div class="rank-toolbar">
+              <input type="text" id="teamName" placeholder="队伍编号（如 27112A）" style="flex:1;min-width:140px">
+              <select id="teamAlliance" style="width:110px">
+                <option value="红方">红方</option>
+                <option value="蓝方">蓝方</option>
+              </select>
+              <button class="btn-primary" id="addTeamBtn">添加队伍</button>
+            </div>
+            <div class="rank-table-wrap">
+            <table class="rank-table" id="rankTable">
+              <thead>
+                <tr>
+                  <th class="w-rank">排名</th>
+                  <th>队伍 / 联盟</th>
+                  <th class="w-alliance">联盟色</th>
+                  <th class="w-score">得分 1</th>
+                  <th class="w-score">得分 2</th>
+                  <th class="w-score">得分 3</th>
+                  <th class="w-total">总分</th>
+                  <th class="w-del">操作</th>
+                </tr>
+              </thead>
+              <tbody id="rankBody"></tbody>
+            </table>
+            </div>
+            <p class="rank-hint" style="margin-top:12px;font-size:12px;color:var(--text-2);line-height:1.7">提示：填入每场得分后自动排序；总分取三场最高（或手动累加）。删除队伍点右侧 ×。</p>
+          </div>
+        </div>
+      </div>
+  <section id="log">
+    <div class="container">
+      <div class="sec-head">
+        <div class="sec-index">03</div>
+        <div>
+          <h2 class="sec-zh">工程日志与迭代</h2>
+          <div class="sec-en">ENGINEERING LOG</div>
+        </div>
+        <div class="sec-rule"></div>
+        <p class="sec-desc">程序工程笔记：每一处自动赛调试都来自实战复盘，问题、根因与解法可逐条追溯。</p>
+      </div>
+      <div class="plog">
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-01</span>
+            <span class="tag">自动赛复盘</span>
+          </div>
+          <h3>失分归因：黄包双持</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>自动赛三场最高仅 <b>56 分</b>，三场屡次触发黄包双持。</p></div>
+          <div class="plog-row"><span class="plog-k">根因</span><p>新场地地面滑，到位角度偏移；程序缺少自我矫正方案，且赛中改参无法上真场验证，改后角度反而偏小。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>重构靠墙与到位逻辑（见 P-05），加入分段速度矫正（见 P-02），并在程序侧引入吸包状态锁约束双持触发。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>双持触发从每场多次收敛为可控，失分缺口收窄。</p></div>
+        </div>
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-02</span>
+            <span class="tag">到位矫正</span>
+          </div>
+          <h3>L4 到位：分段速度撞柱矫正</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>不同场地 L4 到位角度漂移；全速撞柱又会让黄包从拨片滑落。</p></div>
+          <div class="plog-row"><span class="plog-k">根因</span><p>场地滑动造成角度偏差，纯参数对位在不同场地不可复用。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>把前进拆成两段速度：第一段 75% 快速接近、第二段 55% 低速轻推，借柱位做机械矫正；跨电量 100→90 实测 4 次，3 个 L4 全部到位。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>L4 到位率在比赛中保持稳定，黄包不再被撞落。</p></div>
+        </div>
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-03</span>
+            <span class="tag">路线策略</span>
+          </div>
+          <h3>路线重构：放弃高风险后段 L4</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>原路线在取完主包后还要冲对方两个黄包打 L4，耗时长且不稳定，三场仅一场打到 L4。</p></div>
+          <div class="plog-row"><span class="plog-k">根因</span><p>后段 L4 时间成本与失败风险双高，性价比差。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>删掉后段两个黄包，主线改为「三黄包 → 三场上红包 + 四预装」，把时间让给稳定的 L3。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>得分结构更稳，单场得分下限抬升。</p></div>
+        </div>
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-04</span>
+            <span class="tag">容错控制</span>
+          </div>
+          <h3>LED 分支：L4 中断路线</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>L4 一旦跑偏，程序只能等待整段跑完，没有任何容错出口。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>用 TouchLED 实现分支：L4 运行中再次按下即中断 L4 线程、停止电机并转跑 L3_2；L4 顺利跑完则自动转 L3_1；以 LED 颜色状态机标识初始化 / L4 启动 / 被打断 / 自动完成。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>跑偏后可即时切换到保底路线，不白丢整段时间。</p></div>
+        </div>
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-05</span>
+            <span class="tag">投射优化</span>
+          </div>
+          <h3>投射函数拆分：shechu 与 shangtang</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>投射瞬间车被向后弹开导致投不远；原 shoot 判定条件苛刻，马达空转浪费大量时间。</p></div>
+          <div class="plog-row"><span class="plog-k">根因</span><p>投射反冲 + 判定条件（shoot 转速低于阈值）过于严格，左右马达持续运转、车不停。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>拆成 shechu 与 shangtang 两段，shangtang 用线程加速弹射；抵竿时设置左右马达速度差，实现斜向投射 L3。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>L3 投射命中率提升，投射耗时明显缩短。</p></div>
+        </div>
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-06</span>
+            <span class="tag">吸包容错</span>
+          </div>
+          <h3>intake 降速：防掀包</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>持续吸包会掀起豆包，L4 上升时包易从拨片掉落。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>新增 inter 函数把 intake 转速降至 50，既防止掀包，又能在包未吸稳时补救。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>掉包率下降，吸包环节容错提升。</p></div>
+        </div>
+
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-07</span>
+            <span class="tag">线上赛</span>
+          </div>
+          <h3>线上赛 L3 竖吸：机械臂挑包翻面</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>线上赛 L3 极不稳定，主要靠运气，大多数包投不上去。</p></div>
+          <div class="plog-row"><span class="plog-k">根因</span><p>竖吸后包方向不对，抛射后角度不正，落入 L3 时翻面失败。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>扔完包后用机械臂顺势挑一下，让包在空中翻转，增加 L3 落入概率。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>L3 成功率明显提升，从几乎投不进变成可稳定投进。</p></div>
+        </div>
+
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-08</span>
+            <span class="tag">线上赛</span>
+          </div>
+          <h3>提前转向：垂直吸红包</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>红包吸包角度不正，竖放后 L3 成功率仍偏低。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>让车提前转向，使车身垂直于红包吸包，保证竖吸方向正确。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>L3 从平均 1 个提升到近 2 个，最高 3 个。程序共投 8 个包（6 红 1 蓝 1 黄）：投 2 个 L3 = 6×6 + 2×12 = <b>60 分</b>；投 3 个 L3 = 5×6 + 3×12 = <b>66 分</b>。</p></div>
+        </div>
+
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-09</span>
+            <span class="tag">线上赛</span>
+          </div>
+          <h3>66 分天花板：世界排名第 17</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>最好成绩 66 分余 0 秒，世界排名第 17，但平均 8 次才出现一个 66 分。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>测试过放 1 个蓝包到 L0 得 1 分，但时间不够。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>66 分基本是这个程序的上限，后续需从路线结构上突破。</p></div>
+        </div>
+
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-10</span>
+            <span class="tag">线上赛</span>
+          </div>
+          <h3>路线大改：优先蓝包</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>66 分天花板无法突破，队友建议多投蓝包提升得分。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>放弃所有装填红包（场上 3 个红包正常得分，清理防误吸），优先投蓝包，剩余时间再投装填红包。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>投完蓝包后剩十几秒，加了 2 个装填红包路线。</p></div>
+        </div>
+
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-11</span>
+            <span class="tag">线上赛</span>
+          </div>
+          <h3>边移边抬杆：省 3-4 秒</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>投蓝包无杆子时等待抬杆浪费时间。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>边移动边抬杆子，利用投蓝包无杆的间隙同步完成机械臂动作。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>每次省 3-4 秒，用 2 个红包换 3 个蓝包净赚；但贴墙时车容易向墙偏，穿模卡出赛场。</p></div>
+        </div>
+
+        <div class="plog-item">
+          <div class="plog-head">
+            <span class="plog-no">P-12</span>
+            <span class="tag">线上赛</span>
+          </div>
+          <h3>参数调优：不再整体大改</h3>
+          <div class="plog-row"><span class="plog-k">问题</span><p>蓝包投放 4 次每次偏差都不一样，循环稳定性差。</p></div>
+          <div class="plog-row"><span class="plog-k">行动</span><p>把偏差较大的两次循环单独拎出来修改参数，不再整体改路线。</p></div>
+          <div class="plog-row"><span class="plog-k">结果</span><p>程序进入参数调优阶段，后续只微调让运行更稳定。</p></div>
+        </div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-head">
+          <h3>程序高光 · L3 投射靠墙</h3>
+          <span class="lang">C++ / VEX IQ</span>
+        </div>
+        <div class="code-shot"><img src="assets/code-highlight.png" alt="程序高光：L3 投射靠墙前进"></div>
+        <div class="code-explain">
+          <div class="ce">
+            <h4>DESIGN · 设计思路</h4>
+            <p>把普通前进和靠墙前进分开：用基础值减去偏移量，使马达左边速度更小，达到向左靠墙。</p>
+          </div>
+          <div class="ce">
+            <h4>SOLVED · 解决的问题</h4>
+            <p>左马达减偏后车身自然贴左墙走，不再依赖陀螺仪精确对位；配合超时与距离双跳出，投 L3 时车始终贴着目标墙，包的投射方向稳定。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer style="border-top:1px solid var(--line);background:rgba(6,14,26,.8)">
+  <div class="container" style="padding:64px 24px 0">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:40px;padding-bottom:52px">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+          <span class="logo-mark" style="width:40px;height:40px">27</span>
+          <div class="logo-txt"><b style="font-family:var(--font-mono);font-size:19px;color:var(--text-0)">27112A</b><span style="font-size:11px;color:var(--text-2)">北京市陈经纶中学分校</span></div>
+        </div>
+        <p style="font-size:13.5px;color:var(--text-2);max-width:380px;line-height:1.9">VEX 赛事答辩专属交互式评审网站。以工程档案与原创计分工具，呈现队伍的工程迭代、技术思考与赛事数据。</p>
+        <p style="font-size:13px;color:var(--text-1);margin-top:16px;letter-spacing:.08em">勤奋创新，稳中求进。</p>
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.24em;color:var(--blue);margin-bottom:18px">SITE NAV</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+          <a href="#home" style="color:var(--text-1)">首页</a>
+          <a href="#team" style="color:var(--text-1)">战队档案</a>
+          <a href="#tool" style="color:var(--text-1)">赛事实用工具</a>
+          <a href="#log" style="color:var(--text-1)">工程日志与迭代</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.24em;color:var(--blue);margin-bottom:18px">PIT MATERIAL</div>
+        <div class="frame" style="width:112px;height:112px;display:flex;align-items:center;justify-content:center;background:var(--bg-0)">
+          <!-- QR 占位 -->
+          <svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true">
+            <rect x="4" y="4" width="18" height="18" fill="none" stroke="#7FB5FF" stroke-width="3"/>
+            <rect x="8" y="8" width="10" height="10" fill="#7FB5FF"/>
+            <rect x="62" y="4" width="18" height="18" fill="none" stroke="#7FB5FF" stroke-width="3"/>
+            <rect x="66" y="8" width="10" height="10" fill="#7FB5FF"/>
+            <rect x="4" y="62" width="18" height="18" fill="none" stroke="#7FB5FF" stroke-width="3"/>
+            <rect x="8" y="66" width="10" height="10" fill="#7FB5FF"/>
+            <g fill="#4D9BFF">
+              <rect x="30" y="6" width="6" height="6"/><rect x="42" y="6" width="6" height="6"/><rect x="54" y="6" width="6" height="6"/>
+              <rect x="30" y="18" width="6" height="6"/><rect x="42" y="18" width="6" height="6"/><rect x="54" y="18" width="6" height="6"/>
+              <rect x="30" y="30" width="6" height="6"/><rect x="42" y="30" width="6" height="6"/><rect x="30" y="42" width="6" height="6"/><rect x="54" y="42" width="6" height="6"/>
+              <rect x="42" y="42" width="6" height="6"/><rect x="30" y="54" width="6" height="6"/><rect x="42" y="54" width="6" height="6"/><rect x="54" y="54" width="6" height="6"/>
+              <rect x="30" y="66" width="6" height="6"/><rect x="42" y="66" width="6" height="6"/><rect x="54" y="66" width="6" height="6"/>
+              <rect x="6" y="30" width="6" height="6"/><rect x="18" y="30" width="6" height="6"/><rect x="6" y="42" width="6" height="6"/><rect x="18" y="42" width="6" height="6"/>
+              <rect x="6" y="54" width="6" height="6"/><rect x="18" y="54" width="6" height="6"/>
+            </g>
+          </svg>
+        </div>
+        <p style="font-size:12px;color:var(--text-2);margin-top:12px">二维码占位 · 部署上线后生成专属二维码，印刷于工程本、海报与机器人车体。</p>
+      </div>
+    </div>
+  </div>
+  <div style="border-top:1px solid var(--line)">
+    <div class="container" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:20px;padding-bottom:20px;font-size:12px;color:var(--text-2);font-family:var(--font-mono);letter-spacing:.06em">
+      <span>© <span id="year">2026</span> 27112A · 北京市陈经纶中学分校</span>
+      <span>VEX LEVEL UP · 2025-2026 SEASON</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============ 交互逻辑 ============ */
+(function(){
+  'use strict';
+  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- 动态背景画布：节点网络 + 慢速漂移 ---- */
+  var cv = document.getElementById('bgCanvas');
+  var ctx = cv.getContext('2d');
+  var W = 0, H = 0, nodes = [], running = true, raf = 0;
+  function resizeBg(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.min(46, Math.round(W * H / 42000));
+    nodes = [];
+    for (var i = 0; i < n; i++){
+      nodes.push({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - .5) * .18, vy: (Math.random() - .5) * .18,
+        r: Math.random() * 1.6 + .8,
+        o: Math.random() * .5 + .15,
+        hue: Math.random() < .12
+      });
+    }
+  }
+  function tickBg(){
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < nodes.length; i++){
+      for (var j = i + 1; j < nodes.length; j++){
+        var a = nodes[i], b = nodes[j];
+        var dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+        if (d2 < 28900){
+          var al = (1 - d2 / 28900) * .15;
+          ctx.strokeStyle = 'rgba(77,155,255,' + al.toFixed(3) + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+    for (var k = 0; k < nodes.length; k++){
+      var n = nodes[k];
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < -20) n.x = W + 20; if (n.x > W + 20) n.x = -20;
+      if (n.y < -20) n.y = H + 20; if (n.y > H + 20) n.y = -20;
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, 6.2832);
+      ctx.fillStyle = n.hue ? 'rgba(255,138,61,' + n.o.toFixed(3) + ')' : 'rgba(127,181,255,' + n.o.toFixed(3) + ')';
+      ctx.fill();
+    }
+    raf = requestAnimationFrame(tickBg);
+  }
+  if (!reduced){
+    resizeBg();
+    window.addEventListener('resize', resizeBg);
+    document.addEventListener('visibilitychange', function(){
+      running = !document.hidden;
+      if (running && !raf) raf = requestAnimationFrame(tickBg);
+    });
+    raf = requestAnimationFrame(tickBg);
+  }
+
+  /* ---- 滚动进度条 + 导航高亮 ---- */
+  var progressBar = document.getElementById('progressBar');
+  var secs = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var navA = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
+  function onScroll(){
+    var y = window.scrollY || document.documentElement.scrollTop;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progressBar.style.width = (max > 0 ? (y / max * 100) : 0) + '%';
+    var cur = 'home';
+    for (var i = 0; i < secs.length; i++){
+      if (y >= secs[i].offsetTop - 140) cur = secs[i].id;
+    }
+    for (var k = 0; k < navA.length; k++){
+      navA[k].classList.toggle('active', navA[k].getAttribute('href') === '#' + cur);
+    }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ---- 移动端导航 ---- */
+  var toggle = document.getElementById('navToggle');
+  var panel = document.getElementById('navPanel');
+  toggle.addEventListener('click', function(){
+    var open = toggle.classList.toggle('open');
+    panel.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  Array.prototype.forEach.call(panel.querySelectorAll('a'), function(a){
+    a.addEventListener('click', function(){
+      toggle.classList.remove('open');
+      panel.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  /* ---- 核心数据滚动计数 ---- */
+  function animateCount(el){
+    var target = parseFloat(el.getAttribute('data-target'));
+    var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    var dur = 1500, t0 = null;
+    function frame(t){
+      if (!t0) t0 = t;
+      var p = Math.min(1, (t - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * e).toFixed(dec);
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = target.toFixed(dec);
+    }
+    requestAnimationFrame(frame);
+  }
+  var statsSeen = false;
+  if ('IntersectionObserver' in window){
+    var statsObs = new IntersectionObserver(function(entries){
+      if (entries[0].isIntersecting && !statsSeen){
+        statsSeen = true;
+        Array.prototype.forEach.call(document.querySelectorAll('.count'), animateCount);
+        Array.prototype.forEach.call(document.querySelectorAll('.stat-bar'), function(b){
+          setTimeout(function(){ b.style.width = b.getAttribute('data-w'); }, 150);
+        });
+        statsObs.disconnect();
+      }
+    }, {threshold:.35});
+    statsObs.observe(document.getElementById('stats'));
+  } else {
+    Array.prototype.forEach.call(document.querySelectorAll('.count'), function(c){ c.textContent = c.getAttribute('data-target'); });
+  }
+
+  /* ---- 计分工具：实时战况估算 ---- */
+  var LEVEL_PTS = {1:3, 2:6, 3:12, 4:16};
+  var foulState = 'none';
+  function clampNum(v, lo, hi){ v = parseInt(v, 10); if (isNaN(v)) v = 0; return Math.max(lo, Math.min(hi, v)); }
+  function calcLive(){
+    var red = 0, blue = 0, yellow = 0;
+    var inputs = document.querySelectorAll('.bag-input');
+    for (var i = 0; i < inputs.length; i++){
+      var inp = inputs[i];
+      var n = clampNum(inp.value, 0, 99);
+      inp.value = n;
+      var lv = inp.getAttribute('data-level');
+      var col = inp.getAttribute('data-color');
+      var pts = LEVEL_PTS[lv] || 0;
+      // L4 仅中立黄包计 16 分，红/蓝方包放置 L4 不计分
+      if (lv === '4' && col !== 'yellow') pts = 0;
+      if (col === 'red') red += n * pts;
+      else if (col === 'blue') blue += n * pts;
+      else yellow += n * pts;
+    }
+    var redScore = red + yellow, blueScore = blue + yellow;
+    var total = red + blue + yellow;
+    document.getElementById('resRed').firstChild.textContent = redScore;
+    document.getElementById('resBlue').firstChild.textContent = blueScore;
+    document.getElementById('resYellow').firstChild.textContent = yellow;
+    var totalCard = document.getElementById('resTotalCard');
+    var totalEl = document.getElementById('resTotal');
+    if (foulState === 'dq'){
+      totalCard.className = 'tr-card key dq';
+      totalEl.firstChild.textContent = '0';
+    } else {
+      totalCard.className = 'tr-card key';
+      totalEl.firstChild.textContent = total;
+    }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.bag-input'), function(inp){
+    inp.addEventListener('input', calcLive);
+  });
+
+  /* ---- 计分工具：合作赛配对测算 ---- */
+  function setVerdict(id, cls, ico, title, msg){
+    var el = document.getElementById(id);
+    el.className = 'verdict ' + cls;
+    el.querySelector('.vd-ico').textContent = ico;
+    el.querySelector('h4').textContent = title;
+    el.querySelector('p').textContent = msg;
+  }
+  var myScore = document.getElementById('myScore');
+  var allyScore = document.getElementById('allyScore');
+  var myScoreVal = document.getElementById('myScoreVal');
+  var allyScoreVal = document.getElementById('allyScoreVal');
+  function calcAlly(){
+    var my = +myScore.value, ally = +allyScore.value, tot = my + ally;
+    document.getElementById('allyTotal').firstChild.textContent = tot;
+    var gap = 300 - tot;
+    document.getElementById('allyGap').firstChild.textContent = (gap > 0 ? '-' : '+') + Math.abs(gap);
+    document.getElementById('allyBar').style.width = Math.min(100, tot / 400 * 100) + '%';
+    var cls, ico, title, msg;
+    if (tot >= 300){
+      cls = 'ok'; ico = 'OK'; title = '联盟总分已达 300 分冲击线';
+      msg = '当前配对具备冲击 300 分实力的条件，可在联盟沟通中确认分工与节奏，向更高分发起冲击。';
+    } else if (tot >= 270){
+      cls = 'warn'; ico = '!!'; title = '接近 300 分，可冲刺';
+      msg = '联盟总分距 300 分线 30 分以内，建议优化末端吸包节奏与配合走位，冲刺 300 分。';
+    } else {
+      cls = 'info'; ico = '+'; title = '暂未达线，建议优化战术';
+      msg = '联盟总分低于 270 分，建议重新评估分工：提高 L3 / L4 高位得分占比，减少无效往返。';
+    }
+    setVerdict('allyVerdict', cls, ico, title, msg);
+  }
+  function bindRange(id, valEl){
+    var r = document.getElementById(id);
+    r.addEventListener('input', function(){
+      valEl.innerHTML = r.value + '<small>分</small>';
+      calcAlly();
+    });
+  }
+  bindRange('myScore', myScoreVal);
+  bindRange('allyScore', allyScoreVal);
+
+  /* ---- 计分工具：规则校验 & 犯规警告 ---- */
+  var doubleHold = document.getElementById('doubleHold');
+  var foulBox = document.getElementById('foulBox');
+  function updateFoul(){
+    if (!doubleHold.checked){
+      foulState = 'none';
+      foulBox.classList.remove('show');
+      setVerdict('foulVerdict', 'ok', 'OK', '当前判定：合规', '未触发双持犯规，本场得分正常有效。程序侧通过吸包状态锁 + 多线程互斥，从逻辑上杜绝双持。');
+    } else {
+      foulBox.classList.add('show');
+      var v = document.querySelector('input[name=foulTimes]:checked').value;
+      if (v === '1'){
+        foulState = 'warn';
+        setVerdict('foulVerdict', 'warn', '!!', '犯规警告 · 累计 1 次', '裁判将要求立即移除多余得分包，本场得分保留但存在取消资格风险，请务必在程序侧加入吸包状态锁。');
+      } else {
+        foulState = 'dq';
+        setVerdict('foulVerdict', 'dq', 'DQ', '取消资格 · 累计 2 次及以上', '本场得分按 0 分处理。双持属严重犯规：规则要求机器人同一时刻仅允许携带 1 个得分包。');
+      }
+    }
+    calcLive();
+  }
+  doubleHold.addEventListener('change', updateFoul);
+  Array.prototype.forEach.call(document.querySelectorAll('input[name=foulTimes]'), function(r){
+    r.addEventListener('change', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.foul-opt'), function(o){
+        o.classList.toggle('on', o.querySelector('input').checked);
+      });
+      updateFoul();
+    });
+  });
+
+  /* ---- 比赛排表 ---- */
+  var rankBody = document.getElementById('rankBody');
+  var rankRows = [];
+  function renderRank(){
+    rankRows.sort(function(a,b){ return b.total - a.total; });
+    rankBody.innerHTML = '';
+    rankRows.forEach(function(row, i){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="rank-no">#' + (i+1) + '</td>' +
+        '<td class="rank-name">' + row.name + '</td>' +
+        '<td class="rank-alli">' + row.alli + '</td>' +
+        '<td><input type="number" min="0" value="' + row.s1 + '" data-idx="' + i + '" data-f="s1"></td>' +
+        '<td><input type="number" min="0" value="' + row.s2 + '" data-idx="' + i + '" data-f="s2"></td>' +
+        '<td><input type="number" min="0" value="' + row.s3 + '" data-idx="' + i + '" data-f="s3"></td>' +
+        '<td class="rank-total">' + row.total + '</td>' +
+        '<td><button class="rank-del" data-del="' + i + '">×</button></td>';
+      rankBody.appendChild(tr);
+    });
+    rankBody.querySelectorAll('input').forEach(function(inp){
+      inp.addEventListener('input', function(){
+        var idx = +this.dataset.idx, f = this.dataset.f;
+        rankRows[idx][f] = +this.value || 0;
+        rankRows[idx].total = Math.max(rankRows[idx].s1, rankRows[idx].s2, rankRows[idx].s3);
+        renderRank();
+      });
+    });
+    rankBody.querySelectorAll('.rank-del').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var idx = +this.dataset.del;
+        rankRows.splice(idx, 1);
+        renderRank();
+      });
+    });
+  }
+  document.getElementById('addTeamBtn').addEventListener('click', function(){
+    var name = document.getElementById('teamName').value.trim();
+    if (!name) return;
+    var alli = document.getElementById('teamAlliance').value;
+    rankRows.push({ name: name, alli: alli, s1: 0, s2: 0, s3: 0, total: 0 });
+    document.getElementById('teamName').value = '';
+    renderRank();
+  });
+  document.getElementById('teamName').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('addTeamBtn').click();
+  });
+
+  /* ---- 页脚年份 ---- */
+  var yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* ---- 初始化计算 ---- */
+  calcLive();
+  calcAlly();
+})();
+</script>
+</body>
+</html>
